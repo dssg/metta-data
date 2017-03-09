@@ -83,7 +83,6 @@ def archive_matrix(
         overwrite=False,
         directory='.',
         format='hd5',
-        train_uuid=None,
 ):
     """Store a design matrix.
 
@@ -101,7 +100,6 @@ def archive_matrix(
         format to save files in
         - hd5: HDF5
         - csv: Comma Separated Values
-    train_uuid (optional): uuid of train set to associate with as a test set
 
     Returns
     -------
@@ -130,29 +128,18 @@ def archive_matrix(
     if not os.path.exists(abs_path_dir):
         os.makedirs(abs_path_dir)
 
-    uuid_fname = directory + '/' + '.matrix_uuids'
 
-    with Lock(uuid_fname + '.lock', lifetime=datetime.timedelta(minutes=20)):
+    check_config_types(matrix_config)
 
-        set_uuids = load_uuids(uuid_fname)
+    matrix_uuid = generate_uuid(matrix_config)
 
-        check_config_types(matrix_config)
+    matrix_config = copy.deepcopy(matrix_config)
+    matrix_config['metta-uuid'] = matrix_uuid
 
-        matrix_uuid = generate_uuid(matrix_config)
+    _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
+                      format=format)
 
-        matrix_config = copy.deepcopy(matrix_config)
-        matrix_config['metta-uuid'] = matrix_uuid
-
-        write_matrix = (overwrite) or (not (matrix_uuid in set_uuids))
-        if write_matrix:
-            _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
-                          format=format)
-
-        if train_uuid:
-            with open(abs_path_dir + '/' + 'matrix_pairs.txt', 'a') as outfile:
-                outfile.write(','.join([train_uuid, matrix_uuid]) + '\n')
-
-        return matrix_uuid
+    return matrix_uuid
 
 
 def _store_matrix(metadata, df_data, title, directory, format='hd5'):
