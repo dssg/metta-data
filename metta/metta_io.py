@@ -128,7 +128,6 @@ def archive_matrix(
     if not os.path.exists(abs_path_dir):
         os.makedirs(abs_path_dir)
 
-
     check_config_types(matrix_config)
 
     matrix_uuid = generate_uuid(matrix_config)
@@ -137,7 +136,7 @@ def archive_matrix(
     matrix_config['metta-uuid'] = matrix_uuid
 
     _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
-                      format=format)
+                  format=format)
 
     return matrix_uuid
 
@@ -307,11 +306,9 @@ def recover_matrix(config, directory='.'):
     else:
         uuid = config
 
-    uuid_fname = directory + '/' + '.matrix_uuids'
-    set_uuids = load_uuids(uuid_fname)
+    fname = directory + '/' + uuid + '.h5'
 
-    if uuid in set_uuids:
-        fname = directory + '/' + uuid + '.h5'
+    if os.path.isfile(fname):
         df_matrix = pd.read_hdf(fname)
         return df_matrix
     else:
