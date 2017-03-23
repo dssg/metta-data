@@ -149,7 +149,7 @@ def archive_matrix(
     write_matrix = (overwrite) or (not(matrix_uuid in set_uuids))
     if write_matrix:
         _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
-                      format=format, write_index)
+                      format, write_index)
 
     if train_uuid:
         with open(abs_path_dir + '/' + 'matrix_pairs.txt', 'a') as outfile:
