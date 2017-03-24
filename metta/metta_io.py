@@ -80,15 +80,13 @@ def archive_train_test(train_config,
     return train_uuid, test_uuid
 
 
-def archive_matrix(
-        matrix_config,
-        df_matrix,
-        overwrite=False,
-        directory='.',
-        format='hd5',
-        train_uuid=None,
-        write_index=True
-):
+def archive_matrix(matrix_config,
+                   df_matrix,
+                   overwrite=False,
+                   directory='.',
+                   format='hd5',
+                   train_uuid=None,
+                   write_index=True):
     """Store a design matrix.
 
     Parameters
@@ -158,13 +156,12 @@ def archive_matrix(
     return matrix_uuid
 
 
-def _store_matrix(
-        metadata,
-        df_data, title,
-        directory,
-        format='hd5',
-        write_index=True
-    ):
+def _store_matrix(metadata,
+                  df_data,
+                  title,
+                  directory,
+                  format='hd5',
+                  write_index=True):
     """
     Store matrix and associated meta-data
 
@@ -219,7 +216,7 @@ def _store_matrix(
         hdf.put(title, df_data, data_columns=True)
         hdf.close()
     elif format == 'csv':
-        df_data.to_csv(directory + '/' + title + '.csv', index = write_index)
+        df_data.to_csv(directory + '/' + title + '.csv', index=write_index)
 
     with open(directory + '/' + '.matrix_uuids', 'a') as uuid_file:
         uuid_file.write(title + '\n')
