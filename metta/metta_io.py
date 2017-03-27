@@ -21,7 +21,8 @@ def archive_train_test(train_config,
                        df_test,
                        directory='.',
                        format='hd5',
-                       overwrite=False):
+                       overwrite=False,
+                       write_index=True):
     """
     Main function for archiving train and test sets
 
@@ -43,6 +44,8 @@ def archive_train_test(train_config,
     overwrite: bool
         If true then identical matrices
         will be overridden.
+    write_index (optional): bool
+        If true, will write the index of the DataFrame to a csv
 
 
     Returns
@@ -60,7 +63,8 @@ def archive_train_test(train_config,
         df_train,
         overwrite=overwrite,
         directory=directory,
-        format=format
+        format=format,
+        write_index=write_index
     )
 
     test_uuid = archive_matrix(
@@ -69,20 +73,20 @@ def archive_train_test(train_config,
         overwrite=overwrite,
         directory=directory,
         format=format,
-        train_uuid=train_uuid
+        train_uuid=train_uuid,
+        write_index=write_index
     )
 
     return train_uuid, test_uuid
 
 
-def archive_matrix(
-        matrix_config,
-        df_matrix,
-        overwrite=False,
-        directory='.',
-        format='hd5',
-        train_uuid=None,
-):
+def archive_matrix(matrix_config,
+                   df_matrix,
+                   overwrite=False,
+                   directory='.',
+                   format='hd5',
+                   train_uuid=None,
+                   write_index=True):
     """Store a design matrix.
 
     Parameters
@@ -100,6 +104,8 @@ def archive_matrix(
         - hd5: HDF5
         - csv: Comma Separated Values
     train_uuid (optional): uuid of train set to associate with as a test set
+    write_index (optional): bool
+        If true, will write the index of the DataFrame to a csv
 
     Returns
     -------
@@ -141,7 +147,7 @@ def archive_matrix(
     write_matrix = (overwrite) or (not(matrix_uuid in set_uuids))
     if write_matrix:
         _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
-                      format=format)
+                      format, write_index)
 
     if train_uuid:
         with open(abs_path_dir + '/' + 'matrix_pairs.txt', 'a') as outfile:
@@ -150,7 +156,12 @@ def archive_matrix(
     return matrix_uuid
 
 
-def _store_matrix(metadata, df_data, title, directory, format='hd5'):
+def _store_matrix(metadata,
+                  df_data,
+                  title,
+                  directory,
+                  format='hd5',
+                  write_index=True):
     """
     Store matrix and associated meta-data
 
@@ -169,6 +180,8 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
         format to save files in
         - hd5: HDF5 (default) compressoin level 5, complib zlib
         - csv: Comma Separated Values
+    write_index (optional): bool
+        If true, will write the index of the DataFrame to a csv
 
     Returns
     -------
@@ -203,7 +216,7 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
         hdf.put(title, df_data, data_columns=True)
         hdf.close()
     elif format == 'csv':
-        df_data.to_csv(directory + '/' + title + '.csv')
+        df_data.to_csv(directory + '/' + title + '.csv', index=write_index)
 
     with open(directory + '/' + '.matrix_uuids', 'a') as uuid_file:
         uuid_file.write(title + '\n')
