@@ -9,7 +9,8 @@ import os
 import pandas as pd
 import warnings
 import datetime
-import uuid
+import json
+import hashlib
 
 
 warnings.filterwarnings("ignore")
@@ -81,7 +82,6 @@ def archive_matrix(
         overwrite=False,
         directory='.',
         format='hd5',
-        train_uuid=None,
 ):
     """Store a design matrix.
 
@@ -99,7 +99,6 @@ def archive_matrix(
         format to save files in
         - hd5: HDF5
         - csv: Comma Separated Values
-    train_uuid (optional): uuid of train set to associate with as a test set
 
     Returns
     -------
@@ -111,7 +110,7 @@ def archive_matrix(
         pass
     elif type(df_matrix) == str:
         abs_path_file = os.path.abspath(df_matrix)
-        if not(os.path.isfile(abs_path_file)):
+        if not (os.path.isfile(abs_path_file)):
             raise IOError('Not a file: {}'.format(abs_path_file))
 
         if abs_path_file[-3:] == 'csv':
@@ -128,9 +127,6 @@ def archive_matrix(
     if not os.path.exists(abs_path_dir):
         os.makedirs(abs_path_dir)
 
-    uuid_fname = directory + '/' + '.matrix_uuids'
-    set_uuids = load_uuids(uuid_fname)
-
     check_config_types(matrix_config)
 
     matrix_uuid = generate_uuid(matrix_config)
@@ -138,14 +134,8 @@ def archive_matrix(
     matrix_config = copy.deepcopy(matrix_config)
     matrix_config['metta-uuid'] = matrix_uuid
 
-    write_matrix = (overwrite) or (not(matrix_uuid in set_uuids))
-    if write_matrix:
-        _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
-                      format=format)
-
-    if train_uuid:
-        with open(abs_path_dir + '/' + 'matrix_pairs.txt', 'a') as outfile:
-            outfile.write(','.join([train_uuid, matrix_uuid]) + '\n')
+    _store_matrix(matrix_config, df_matrix, matrix_uuid, abs_path_dir,
+                  format=format)
 
     return matrix_uuid
 
@@ -186,7 +176,7 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
     # check last column is the label
     last_col = df_data.columns.tolist()[-1]
 
-    if not(metadata['label_name'] == last_col):
+    if not (metadata['label_name'] == last_col):
         raise IOError('label_name is not last column')
 
     yaml_fname = directory + '/' + title + '.yaml'
@@ -241,7 +231,7 @@ def check_config_types(dict_config):
         ['start_time', 'end_time', 'prediction_window', 'label_name',
          'matrix_id'])
 
-    if not(set_required_names.issubset(dict_config.keys())):
+    if not (set_required_names.issubset(dict_config.keys())):
         raise IOError('missing required keys in dictionary',
                       set_required_names)
 
@@ -285,11 +275,16 @@ def generate_uuid(metadata):
     :returns: unique name for the file
     :rtype: str
     """
-    identifier = ''
-    for key in sorted(metadata.keys()):
-        identifier = '{0}_{1}'.format(identifier, str(metadata[key]))
-    name_uuid = str(uuid.uuid3(uuid.NAMESPACE_DNS, identifier))
-    return name_uuid
+
+    def dt_handler(x):
+        if isinstance(x, datetime.datetime) or isinstance(x, datetime.date):
+            return x.isoformat()
+        raise TypeError("Unknown type")
+
+    return hashlib.md5(
+        json.dumps(metadata, default=dt_handler, sort_keys=True)
+            .encode('utf-8')
+    ).hexdigest()
 
 
 def recover_matrix(config, directory='.'):
@@ -315,11 +310,9 @@ def recover_matrix(config, directory='.'):
     else:
         uuid = config
 
-    uuid_fname = directory + '/' + '.matrix_uuids'
-    set_uuids = load_uuids(uuid_fname)
+    fname = directory + '/' + uuid + '.h5'
 
-    if uuid in set_uuids:
-        fname = directory + '/' + uuid + '.h5'
+    if os.path.isfile(fname):
         df_matrix = pd.read_hdf(fname)
         return df_matrix
     else:
