@@ -13,7 +13,6 @@ import uuid
 import json
 import hashlib
 from flufl.lock import Lock
-import csv
 import shutil
 
 warnings.filterwarnings("ignore")
@@ -197,10 +196,8 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
         if not (os.path.isfile(abs_path_file)):
             raise IOError('Not a file: {}'.format(abs_path_file))
         if abs_path_file[-3:] == 'csv':
-            with open(abs_path_file) as f:
-                reader = csv.reader(f)
-                headers = next(reader)
-                last_col = headers[-1]
+            headers = pd.read_csv(abs_path_file, nrows=1)
+            last_col = headers.columns.tolist()[-1]
 
     if not (metadata['label_name'] == last_col):
         raise IOError('label_name is not last column')
