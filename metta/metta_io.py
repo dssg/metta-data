@@ -7,14 +7,10 @@ import copy
 import yaml
 import os
 import pandas as pd
-import warnings
 import datetime
 import json
 import hashlib
 import shutil
-
-
-warnings.filterwarnings("ignore")
 
 
 def archive_train_test(train_config,
@@ -199,11 +195,12 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
         yaml.dump(metadata, stream)
 
     if format == 'hd5':
-        print(directory + '/' + title + '.h5')
+
         hdf = pd.HDFStore(directory + '/' + title + '.h5',
                           mode='w',
                           complevel=5,
-                          complib="zlib")
+                          complib="zlib",
+                          format='table')
         hdf.put(title, df_data, data_columns=True)
         hdf.close()
     elif format == 'csv':
