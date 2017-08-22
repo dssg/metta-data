@@ -198,9 +198,9 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
     if format == 'hd5':
 
         for col in df_data.columns:
-            if (df_data[col].dtype=np.dtype('datetime64[ns]')):
+            if (df_data[col].dtype == np.dtype('datetime64[ns]')):
                 df_data[col] = df_data[col].map(lambda x: x.timestamp())
-            else isinstance(df_data[col].dtype, object):
+            elif isinstance(df_data[col].dtype, object):
                 df_data[col] = df_data[col].astype(float)
 
         hdf = pd.HDFStore(directory + '/' + title + '.h5',
