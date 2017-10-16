@@ -234,9 +234,9 @@ def check_config_types(dict_config):
        Check the configuration types.
     The required types are:
 
-    - beginning_of_time: datetime.datetime
+    - start_time: datetime.datetime
     - end_time: datetime.datetime
-    - label_window: str
+    - prediction_window: str
     - label_name: str
     - matrix_id: human readable name for the data
 
@@ -247,7 +247,7 @@ def check_config_types(dict_config):
 
     """
     set_required_names = set(
-        ['beginning_of_time', 'end_time', 'label_window', 'label_name',
+        ['start_time', 'end_time', 'prediction_window', 'label_name',
          'matrix_id'])
 
     if not (set_required_names.issubset(dict_config.keys())):
@@ -255,9 +255,9 @@ def check_config_types(dict_config):
                       set_required_names)
 
     # check that the start time and end times are correct
-    assert isinstance(dict_config['beginning_of_time'], datetime.date)
+    assert isinstance(dict_config['start_time'], datetime.date)
     assert isinstance(dict_config['end_time'], datetime.date)
-    assert isinstance(dict_config['label_window'], str)
+    assert isinstance(dict_config['prediction_window'], str)
     assert isinstance(dict_config['matrix_id'], str)
 
 
