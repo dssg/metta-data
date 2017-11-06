@@ -33,7 +33,7 @@ def parse_requirements(fname):
 
 setup(
     name='metta-data',
-    version='0.2.2',
+    version='0.3.0',
     description="Store/Read train and test matrices",
     long_description=readme + '\n\n',
     author="Center for Data Science and Public Policy",
