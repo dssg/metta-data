@@ -1,9 +1,11 @@
 # metta-data
+
 Train Matrix and Test Matrix Storage
 
 [![Build Status](https://travis-ci.org/dssg/metta-data.svg?branch=master)](https://travis-ci.org/dssg/metta-data)
 [![codecov](https://codecov.io/gh/dssg/metta-data/branch/master/graph/badge.svg)](https://codecov.io/gh/dssg/metta-data)
 
+**Note**: Metta-data is now a bundled component of [Triage](https://github.com/dssg/triage), and future development will take place there. To utilize metta-data within your custom pipeline, you may still import it from there.
 
 ##  Description
 
