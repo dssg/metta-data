@@ -197,15 +197,13 @@ def _store_matrix(metadata, df_data, title, directory, format='hd5'):
 
     if format == 'hd5':
 
-        for col in df_data.columns:
-            if (df_data[col].dtype == np.dtype('datetime64[ns]')):
-                df_data[col] = df_data[col].map(lambda x: x.timestamp())
-            elif isinstance(df_data[col].dtype, object):
-                df_data[col] = df_data[col].astype(float)
+        # convert pandas internal high precision objects to standard numeric types. Dates will be converted to
+        # nanoseconds.
+        df_data = df_data.apply(pd.to_numeric)
 
         hdf = pd.HDFStore(directory + '/' + title + '.h5',
                           mode='w',
-                          complevel=5,
+                          complevel=4,
                           complib="zlib",
                           format='table')
         hdf.put(title, df_data, data_columns=True)
